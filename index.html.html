@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Show-up vs Sales, week by week — BFM Workshops</title>
+<style>
+  :root{
+    color-scheme: light;
+    --plane:#f9f9f7; --surface:#fcfcfb;
+    --ink:#0b0b0b; --ink-2:#52514e; --muted:#898781;
+    --grid:#e1e0d9; --axis:#0b0b0b; --border:rgba(11,11,11,0.10);
+    --s1:#2a78d6;  --s2:#eb6834;
+    --band:rgba(42,120,214,0.08); --bandline:rgba(42,120,214,0.35);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      color-scheme: dark;
+      --plane:#0d0d0d; --surface:#1a1a19;
+      --ink:#ffffff; --ink-2:#c3c2b7; --muted:#898781;
+      --grid:#2c2c2a; --axis:#ffffff; --border:rgba(255,255,255,0.10);
+      --s1:#3987e5; --s2:#d95926;
+      --band:rgba(57,135,229,0.14); --bandline:rgba(57,135,229,0.45);
+    }
+  }
+  :root[data-theme="dark"]{
+    color-scheme: dark;
+    --plane:#0d0d0d; --surface:#1a1a19;
+    --ink:#ffffff; --ink-2:#c3c2b7; --muted:#898781;
+    --grid:#2c2c2a; --axis:#ffffff; --border:rgba(255,255,255,0.10);
+    --s1:#3987e5; --s2:#d95926;
+    --band:rgba(57,135,229,0.14); --bandline:rgba(57,135,229,0.45);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--plane);color:var(--ink);
+       font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
+       -webkit-font-smoothing:antialiased;padding:30px 20px 50px}
+  .wrap{max-width:1060px;margin:0 auto}
+  h1{font-size:23px;line-height:1.25;margin:0 0 6px;letter-spacing:-0.01em}
+  .sub{color:var(--ink-2);font-size:13.5px;margin:0 0 20px;max-width:82ch;line-height:1.55}
+  .bar-row{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+  .seg{display:inline-flex;border:1px solid var(--border);border-radius:8px;overflow:hidden}
+  .seg button{border:none;border-radius:0}
+  .seg button + button{border-left:1px solid var(--border)}
+  .seg button[aria-pressed="true"]{background:var(--band);color:var(--ink);font-weight:600}
+  .spacer{flex:1}
+  button{font:inherit;font-size:12.5px;color:var(--ink-2);background:var(--surface);
+         border:1px solid var(--border);border-radius:8px;padding:6px 13px;cursor:pointer}
+  button:hover{color:var(--ink)}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:18px 18px 12px}
+  .legend{display:flex;gap:20px;align-items:center;flex-wrap:wrap;font-size:13px;color:var(--ink-2);
+          margin-bottom:6px}
+  .key{display:inline-flex;align-items:center;gap:8px}
+  .lk{width:18px;height:2px;border-radius:1px;display:inline-block;position:relative}
+  .lk::after{content:"";position:absolute;left:5px;top:-3px;width:8px;height:8px;border-radius:50%;
+             background:inherit;box-shadow:0 0 0 2px var(--surface)}
+  .lk.a{background:var(--s1)} .lk.b{background:var(--s2)}
+  .key.ai .sw{width:14px;height:12px;border-radius:3px;background:var(--band);
+              border:1px solid var(--bandline);display:inline-block}
+  svg{display:block;width:100%;height:auto;overflow:visible}
+  .gl{stroke:var(--grid);stroke-width:1}
+  .axis{stroke:var(--axis);stroke-width:2;stroke-linecap:square}
+  .atick{stroke:var(--axis);stroke-width:1.5}
+  .ticky,.tickx{font-size:11px;fill:var(--ink-2);font-variant-numeric:tabular-nums}
+  .tickx.b{font-size:11.5px;fill:var(--ink);font-weight:600}
+  .axtitle{font-size:11.5px;fill:var(--ink);font-weight:600;letter-spacing:.02em}
+  .endlab{font-size:12px;font-weight:600;fill:var(--ink)}
+  .aitag{font-size:10.5px;fill:var(--ink-2);font-weight:600;letter-spacing:.03em}
+  #tableview{margin-top:14px;background:var(--surface);border:1px solid var(--border);
+             border-radius:11px;padding:14px 16px;overflow-x:auto}
+  table{border-collapse:collapse;width:100%;font-size:12.5px;min-width:640px}
+  th,td{padding:7px 10px;text-align:right;border-bottom:1px solid var(--grid);
+        font-variant-numeric:tabular-nums;white-space:nowrap}
+  th{color:var(--ink-2);font-weight:600;font-size:11.5px}
+  th:first-child,td:first-child,th:nth-child(2),td:nth-child(2){text-align:left;font-variant-numeric:normal}
+  tr.ai td{background:var(--band)}
+  #tip{position:fixed;pointer-events:none;opacity:0;transition:opacity .1s;z-index:9;
+       background:var(--surface);border:1px solid var(--border);border-radius:9px;
+       padding:10px 12px;font-size:12.5px;box-shadow:0 8px 26px rgba(0,0,0,.15);min-width:196px}
+  #tip .t{font-weight:600;margin-bottom:7px}
+  #tip .r{display:flex;align-items:center;gap:9px;margin-top:4px}
+  #tip .r .k{width:12px;height:2px;border-radius:1px;flex:none}
+  #tip .n{color:var(--ink-2);font-size:11.5px}
+  #tip .v{font-weight:600;margin-left:auto;font-variant-numeric:tabular-nums}
+  .note{font-size:12.5px;color:var(--muted);line-height:1.65;margin-top:16px;max-width:88ch}
+  .note b{color:var(--ink-2);font-weight:600}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Show-up vs Sales, week by week</h1>
+  <p class="sub">BFM Workshops B169 → B177. Both lines are <b>indexed to B169 = 100</b> so two very
+     different quantities (≈2,500 attendees vs ≈250 orders) share one honest y-axis and their shapes
+     can be compared directly. Hover any week for the real numbers. <b>B175–B176 are the AI-calling
+     weeks</b>, shaded below.</p>
+
+  <div class="bar-row">
+    <span style="font-size:12.5px;color:var(--ink-2)">Sales line:</span>
+    <span class="seg">
+      <button id="m-ord" aria-pressed="true">Orders</button>
+      <button id="m-rev" aria-pressed="false">Revenue</button>
+    </span>
+    <span class="spacer"></span>
+    <button id="tgl-table" aria-expanded="true">Hide table</button>
+    <button id="tgl-theme">Toggle theme</button>
+  </div>
+
+  <div class="card">
+    <div class="legend">
+      <span class="key"><span class="lk a"></span> Unique show-up</span>
+      <span class="key"><span class="lk b"></span> <span id="lg2">Orders</span></span>
+      <span class="key ai"><span class="sw"></span> AI-calling weeks</span>
+    </div>
+    <div id="plot"></div>
+  </div>
+
+  <div id="tableview"></div>
+  <p class="note" id="notes"></p>
+</div>
+<div id="tip" role="status" aria-live="polite"></div>
+
+<script>
+const DATA = [
+  {b:'B169', wk:'06–08 Jun', uniq:2577, ord:291, rev:210592.60},
+  {b:'B170', wk:'13–15 Jun', uniq:3023, ord:271, rev:223968.00},
+  {b:'B171', wk:'20–22 Jun', uniq:2631, ord:268, rev:224550.28},
+  {b:'B172', wk:'27–29 Jun', uniq:2883, ord:251, rev:210590.20},
+  {b:'B173', wk:'04–06 Jul', uniq:2267, ord:221, rev:167976.00},
+  {b:'B174', wk:'11–13 Jul', uniq:3125, ord:268, rev:189618.00},
+  {b:'B175', wk:'18–20 Jul', uniq:2567, ord:244, rev:203700.80, ai:true},
+  {b:'B176', wk:'25–27 Jul', uniq:2625, ord:233, rev:175651.20, ai:true},
+  {b:'B177', wk:'01–03 Aug', uniq:2914, ord:234, rev:127264.00, partial:true}
+];
+const num  = n => n.toLocaleString('en-IN');
+const inr  = n => '₹' + Math.round(n).toLocaleString('en-IN');
+const NS   = 'http://www.w3.org/2000/svg';
+const el   = (n,at={}) => { const e = document.createElementNS(NS,n);
+  for (const k in at) e.setAttribute(k,at[k]); return e; };
+
+let METRIC = 'ord';                       // 'ord' | 'rev'
+const salesOf = d => METRIC === 'ord' ? d.ord : d.rev;
+const salesName = () => METRIC === 'ord' ? 'Orders' : 'Revenue';
+const salesFmt  = v => METRIC === 'ord' ? num(v) : inr(v);
+
+const W=960, H=470, M={t:26,r:96,b:74,l:64};
+const PW=W-M.l-M.r, PH=H-M.t-M.b;
+
+function draw(){
+  const host = document.getElementById('plot');
+  host.textContent = '';
+  const base = {u:DATA[0].uniq, s:salesOf(DATA[0])};
+  const pts = DATA.map((d,i)=>({d,i, u:d.uniq/base.u*100, s:salesOf(d)/base.s*100}));
+  const lo = Math.min(...pts.flatMap(p=>[p.u,p.s])), hi = Math.max(...pts.flatMap(p=>[p.u,p.s]));
+  const yMin = Math.floor((lo-8)/10)*10, yMax = Math.ceil((hi+8)/10)*10;
+  const x = i => M.l + (PW/(DATA.length-1))*i;
+  const y = v => M.t + PH - (v-yMin)/(yMax-yMin)*PH;
+
+  const svg = el('svg',{viewBox:`0 0 ${W} ${H}`, role:'img'});
+  const ttl = el('title'); ttl.textContent =
+    'Unique show-up and ' + salesName().toLowerCase() + ' per week, indexed to B169 = 100';
+  svg.appendChild(ttl);
+
+  /* AI-calling band */
+  const ai = pts.filter(p=>p.d.ai);
+  if (ai.length){
+    const half = PW/(DATA.length-1)/2;
+    const x0 = x(ai[0].i)-half, x1 = x(ai[ai.length-1].i)+half;
+    svg.appendChild(el('rect',{x:x0,y:M.t,width:x1-x0,height:PH,fill:'var(--band)'}));
+    svg.appendChild(el('line',{x1:x0,x2:x0,y1:M.t,y2:M.t+PH,stroke:'var(--bandline)','stroke-width':1}));
+    svg.appendChild(el('line',{x1:x1,x2:x1,y1:M.t,y2:M.t+PH,stroke:'var(--bandline)','stroke-width':1}));
+    const tag = el('text',{x:(x0+x1)/2,y:M.t-9,class:'aitag','text-anchor':'middle'});
+    tag.textContent = 'AI-CALLING WEEKS'; svg.appendChild(tag);
+  }
+
+  /* gridlines + emphasised Y axis */
+  for (let v=yMin; v<=yMax; v+=10){
+    svg.appendChild(el('line',{x1:M.l,x2:M.l+PW,y1:y(v),y2:y(v),class:'gl'}));
+    svg.appendChild(el('line',{x1:M.l-6,x2:M.l,y1:y(v),y2:y(v),class:'atick'}));
+    const t = el('text',{x:M.l-11,y:y(v)+3.8,class:'ticky','text-anchor':'end'});
+    t.textContent = v; svg.appendChild(t);
+  }
+  /* the 100 baseline — where both series start */
+  if (yMin < 100 && yMax > 100){
+    svg.appendChild(el('line',{x1:M.l,x2:M.l+PW,y1:y(100),y2:y(100),
+      stroke:'var(--ink-2)','stroke-width':1,opacity:'.5'}));
+  }
+
+  svg.appendChild(el('line',{x1:M.l,x2:M.l,y1:M.t-4,y2:M.t+PH,class:'axis'}));          // Y axis
+  svg.appendChild(el('line',{x1:M.l,x2:M.l+PW+8,y1:M.t+PH,y2:M.t+PH,class:'axis'}));    // X axis
+
+  const yt = el('text',{class:'axtitle','text-anchor':'middle',
+    transform:`translate(${M.l-46},${M.t+PH/2}) rotate(-90)`});
+  yt.textContent = 'INDEX  (B169 = 100)'; svg.appendChild(yt);
+  const xt = el('text',{x:M.l+PW/2,y:H-14,class:'axtitle','text-anchor':'middle'});
+  xt.textContent = 'WEEK  (workshop batch)'; svg.appendChild(xt);
+
+  /* x ticks + labels */
+  pts.forEach(p => {
+    svg.appendChild(el('line',{x1:x(p.i),x2:x(p.i),y1:M.t+PH,y2:M.t+PH+6,class:'atick'}));
+    const a = el('text',{x:x(p.i),y:M.t+PH+21,class:'tickx b','text-anchor':'middle'});
+    a.textContent = p.d.b + (p.d.partial?'*':''); svg.appendChild(a);
+    const b = el('text',{x:x(p.i),y:M.t+PH+35,class:'tickx','text-anchor':'middle',opacity:'.85'});
+    b.textContent = p.d.wk; svg.appendChild(b);
+  });
+
+  /* lines */
+  const line = (key,color) => {
+    const solid = pts.filter(p=>!p.d.partial);
+    svg.appendChild(el('path',{fill:'none',stroke:color,'stroke-width':2,
+      'stroke-linejoin':'round','stroke-linecap':'round',
+      d:solid.map((p,k)=>(k?'L':'M')+x(p.i)+','+y(p[key])).join(' ')}));
+    if (pts.some(p=>p.d.partial)){                       // faded tail into the partial week
+      const a = solid[solid.length-1], b = pts[pts.length-1];
+      svg.appendChild(el('path',{fill:'none',stroke:color,'stroke-width':2,opacity:'.4',
+        d:`M${x(a.i)},${y(a[key])} L${x(b.i)},${y(b[key])}`}));
+    }
+  };
+  line('u','var(--s1)'); line('s','var(--s2)');
+
+  /* markers + end labels */
+  [['u','var(--s1)','Show-up'],['s','var(--s2)',salesName()]].forEach(([key,color,name])=>{
+    pts.forEach(p=>{
+      svg.appendChild(el('circle',{cx:x(p.i),cy:y(p[key]),r:4.5,fill:color,
+        stroke:'var(--surface)','stroke-width':2, opacity:p.d.partial?'.5':'1'}));
+    });
+    const last = pts[pts.length-1];
+    const t = el('text',{x:x(last.i)+13,y:y(last[key])+4,class:'endlab'});
+    t.textContent = name; svg.appendChild(t);
+  });
+
+  /* crosshair + hit columns */
+  const cross = el('line',{x1:0,x2:0,y1:M.t,y2:M.t+PH,stroke:'var(--ink-2)',
+    'stroke-width':1,opacity:'0'});
+  svg.appendChild(cross);
+  pts.forEach(p=>{
+    const half = PW/(DATA.length-1)/2;
+    const g = el('g',{tabindex:'0',role:'listitem'});
+    g.appendChild(el('rect',{x:x(p.i)-half,y:M.t,width:half*2,height:PH,
+      fill:'transparent',style:'cursor:crosshair'}));
+    const on = e => { cross.setAttribute('x1',x(p.i)); cross.setAttribute('x2',x(p.i));
+                      cross.setAttribute('opacity','.45'); show(p,e,g); };
+    g.addEventListener('pointerenter',on);
+    g.addEventListener('pointermove',e=>move(e));
+    g.addEventListener('focus',e=>on(e));
+    g.addEventListener('pointerleave',off);
+    g.addEventListener('blur',off);
+    svg.appendChild(g);
+  });
+  function off(){ cross.setAttribute('opacity','0'); hide(); }
+
+  host.appendChild(svg);
+  document.getElementById('lg2').textContent = salesName();
+}
+
+/* tooltip */
+const tip = document.getElementById('tip');
+function show(p,e,g){
+  const d = p.d;
+  tip.textContent='';
+  const t = document.createElement('div'); t.className='t';
+  t.textContent = d.b + '  ·  ' + d.wk + (d.ai?'  · AI-calling':'') + (d.partial?'  · partial':'');
+  tip.appendChild(t);
+  [['var(--s1)','Unique show-up', num(d.uniq), 'index ' + p.u.toFixed(0)],
+   ['var(--s2)', salesName(), salesFmt(salesOf(d)), 'index ' + p.s.toFixed(0)]
+  ].forEach(([c,n,v,ix])=>{
+    const r = document.createElement('div'); r.className='r';
+    const k = document.createElement('span'); k.className='k'; k.style.background=c;
+    const nn= document.createElement('span'); nn.className='n'; nn.textContent = n+' · '+ix;
+    const vv= document.createElement('span'); vv.className='v'; vv.textContent = v;
+    r.append(k,nn,vv); tip.appendChild(r);
+  });
+  const r = document.createElement('div'); r.className='r';
+  const nn= document.createElement('span'); nn.className='n';
+  nn.textContent = 'Orders per 100 show-ups';
+  const vv= document.createElement('span'); vv.className='v';
+  vv.textContent = (d.ord/d.uniq*100).toFixed(1);
+  r.append(nn,vv); tip.appendChild(r);
+  tip.style.opacity=1;
+  if (g && !e.clientX){ const bb=g.getBoundingClientRect();
+    move({clientX:bb.left+bb.width/2, clientY:bb.top+60}); } else move(e);
+}
+function move(e){
+  const w=tip.offsetWidth,h=tip.offsetHeight;
+  let x=e.clientX+16, y=e.clientY-h-14;
+  if (x+w>innerWidth-8) x=e.clientX-w-16;
+  if (y<8) y=e.clientY+20;
+  tip.style.left=x+'px'; tip.style.top=y+'px';
+}
+function hide(){ tip.style.opacity=0; }
+
+/* table view */
+const tv = document.getElementById('tableview');
+function table(){
+  tv.textContent='';
+  const t = document.createElement('table');
+  const hd = document.createElement('tr');
+  ['Batch','Week','Unique show-up','Index','Orders','Revenue','Index ('+salesName()+')','Orders per 100']
+    .forEach(n=>{const th=document.createElement('th');th.textContent=n;hd.appendChild(th);});
+  const th_=document.createElement('thead'); th_.appendChild(hd); t.appendChild(th_);
+  const tb=document.createElement('tbody');
+  const b0={u:DATA[0].uniq,s:salesOf(DATA[0])};
+  DATA.forEach(d=>{
+    const tr=document.createElement('tr'); if(d.ai) tr.className='ai';
+    [d.b, d.wk+(d.partial?' *':''), num(d.uniq), (d.uniq/b0.u*100).toFixed(0),
+     num(d.ord), inr(d.rev), (salesOf(d)/b0.s*100).toFixed(0), (d.ord/d.uniq*100).toFixed(1)]
+     .forEach(v=>{const td=document.createElement('td');td.textContent=v;tr.appendChild(td);});
+    tb.appendChild(tr);
+  });
+  t.appendChild(tb); tv.appendChild(t);
+}
+
+/* notes */
+const notes=document.getElementById('notes');
+[['Why indexed. ','Show-up runs in thousands and sales in hundreds. Plotting them on two separate '+
+  'y-scales would let the scales be set to invent a correlation; indexing both to their B169 value '+
+  'puts them on one real axis, where a gap between the lines is a genuine divergence.'],
+ ['AI-calling weeks. ','B175 and B176 (shaded). Across those two weeks the batches produced 9.2 '+
+  'orders per 100 unique show-ups against 9.5 for the six earlier full weeks — inside the ordinary '+
+  'week-to-week spread, so no measurable lift or drop shows in this data.'],
+ ['*B177. ','Its sales week is cut off at Aug 5, so the final segment of the sales line is faded — '+
+  'that dip is missing days, not lost demand. B168 is left out entirely (only its Monday session '+
+  'was in the Zoom export).'],
+ ['Show-up dedupe. ','The Zoom Email column is blank on ~99.9% of rows, so unique attendees are '+
+  'deduped by normalised display name.']
+].forEach(([b,t])=>{
+  const s=document.createElement('b'); s.textContent=b;
+  notes.append(s,document.createTextNode(t),document.createElement('br'),document.createElement('br'));
+});
+
+/* controls */
+function setMetric(m){
+  METRIC=m;
+  document.getElementById('m-ord').setAttribute('aria-pressed', String(m==='ord'));
+  document.getElementById('m-rev').setAttribute('aria-pressed', String(m==='rev'));
+  draw(); table();
+}
+document.getElementById('m-ord').addEventListener('click',()=>setMetric('ord'));
+document.getElementById('m-rev').addEventListener('click',()=>setMetric('rev'));
+document.getElementById('tgl-table').addEventListener('click',e=>{
+  const on = tv.style.display!=='none';
+  tv.style.display = on?'none':'block';
+  e.target.textContent = on?'Show table':'Hide table';
+  e.target.setAttribute('aria-expanded',String(!on));
+});
+document.getElementById('tgl-theme').addEventListener('click',()=>{
+  const cur=document.documentElement.getAttribute('data-theme');
+  const dark = cur ? cur==='dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+  document.documentElement.setAttribute('data-theme', dark?'light':'dark');
+});
+addEventListener('resize',()=>{});
+draw(); table();
+</script>
+</body>
+</html>
