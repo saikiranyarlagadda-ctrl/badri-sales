@@ -3,281 +3,597 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Show-up vs Sales, week by week — BFM Workshops</title>
+<meta name="robots" content="noindex, nofollow">
+<title>Registrations → Show-up → Sales — BFM Workshops</title>
 <style>
   :root{
     color-scheme: light;
     --plane:#f9f9f7; --surface:#fcfcfb;
     --ink:#0b0b0b; --ink-2:#52514e; --muted:#898781;
-    --grid:#e1e0d9; --axis:#0b0b0b; --border:rgba(11,11,11,0.10);
-    --s1:#2a78d6;  --s2:#eb6834;
-    --band:rgba(42,120,214,0.08); --bandline:rgba(42,120,214,0.35);
+    --grid:#e1e0d9; --base:#c3c2b7; --border:rgba(11,11,11,0.10);
+    --s1:#2a78d6;              /* show-up % */
+    --s2:#eb6834;              /* order %   */
+    --good:#006300;
+    --wash:rgba(42,120,214,0.07);
+    --bandline:rgba(42,120,214,0.32);
   }
   @media (prefers-color-scheme: dark){
     :root:not([data-theme="light"]){
       color-scheme: dark;
       --plane:#0d0d0d; --surface:#1a1a19;
       --ink:#ffffff; --ink-2:#c3c2b7; --muted:#898781;
-      --grid:#2c2c2a; --axis:#ffffff; --border:rgba(255,255,255,0.10);
-      --s1:#3987e5; --s2:#d95926;
-      --band:rgba(57,135,229,0.14); --bandline:rgba(57,135,229,0.45);
+      --grid:#2c2c2a; --base:#383835; --border:rgba(255,255,255,0.10);
+      --s1:#3987e5; --s2:#d95926; --good:#0ca30c;
+      --wash:rgba(57,135,229,0.12); --bandline:rgba(57,135,229,0.42);
     }
   }
   :root[data-theme="dark"]{
     color-scheme: dark;
     --plane:#0d0d0d; --surface:#1a1a19;
     --ink:#ffffff; --ink-2:#c3c2b7; --muted:#898781;
-    --grid:#2c2c2a; --axis:#ffffff; --border:rgba(255,255,255,0.10);
-    --s1:#3987e5; --s2:#d95926;
-    --band:rgba(57,135,229,0.14); --bandline:rgba(57,135,229,0.45);
+    --grid:#2c2c2a; --base:#383835; --border:rgba(255,255,255,0.10);
+    --s1:#3987e5; --s2:#d95926; --good:#0ca30c;
+    --wash:rgba(57,135,229,0.12); --bandline:rgba(57,135,229,0.42);
   }
   *{box-sizing:border-box}
   body{margin:0;background:var(--plane);color:var(--ink);
        font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
-       -webkit-font-smoothing:antialiased;padding:30px 20px 50px}
-  .wrap{max-width:1060px;margin:0 auto}
+       -webkit-font-smoothing:antialiased;padding:30px 20px 54px}
+  .wrap{max-width:1080px;margin:0 auto}
   h1{font-size:23px;line-height:1.25;margin:0 0 6px;letter-spacing:-0.01em}
-  .sub{color:var(--ink-2);font-size:13.5px;margin:0 0 20px;max-width:82ch;line-height:1.55}
-  .bar-row{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+  .sub{color:var(--ink-2);font-size:13.5px;margin:0 0 22px;max-width:84ch;line-height:1.58}
+  .sub b{color:var(--ink);font-weight:600}
+
+  /* headline tiles */
+  .tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+  .tile{background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:14px 16px 13px}
+  .tile .lab{font-size:11.5px;color:var(--ink-2);font-weight:600;letter-spacing:.03em;
+             text-transform:uppercase;margin-bottom:9px}
+  .pair{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}
+  .v{font-size:26px;font-weight:600;letter-spacing:-0.02em;line-height:1.05}
+  .vtag{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.03em;
+        text-transform:uppercase;margin-right:7px}
+  .arrow{color:var(--muted);font-size:15px}
+  .who{font-size:11.5px;color:var(--muted);margin-top:7px;line-height:1.5}
+  .delta{margin-top:9px;font-size:12.5px;font-weight:600;color:var(--good);
+         display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .delta .sig{color:var(--muted);font-weight:400;font-size:11.5px}
+
+  .bar-row{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin:20px 0 12px}
+  .legend{display:flex;gap:18px;align-items:center;flex-wrap:wrap;font-size:13px;color:var(--ink-2)}
+  .key{display:inline-flex;align-items:center;gap:8px}
+  .key .sw{width:11px;height:11px;border-radius:3px;display:inline-block}
+  .key .d1{background:var(--s1)}
+  .key .lk{width:20px;height:2px;border-radius:1px;background:var(--s2);display:inline-block;position:relative}
+  .key .lk::after{content:"";position:absolute;left:6px;top:-3px;width:8px;height:8px;border-radius:50%;
+                  background:var(--s2);box-shadow:0 0 0 2px var(--plane)}
+  .key .swband{width:14px;height:12px;border-radius:3px;background:var(--wash);
+               border:1px solid var(--bandline);display:inline-block}
+  .key .ring{width:11px;height:11px;border-radius:50%;background:var(--plane);
+             border:2.5px solid var(--muted);display:inline-block}
+  .spacer{flex:1}
   .seg{display:inline-flex;border:1px solid var(--border);border-radius:8px;overflow:hidden}
   .seg button{border:none;border-radius:0}
   .seg button + button{border-left:1px solid var(--border)}
-  .seg button[aria-pressed="true"]{background:var(--band);color:var(--ink);font-weight:600}
-  .spacer{flex:1}
+  .seg button[aria-pressed="true"]{background:var(--wash);color:var(--ink);font-weight:600}
   button{font:inherit;font-size:12.5px;color:var(--ink-2);background:var(--surface);
          border:1px solid var(--border);border-radius:8px;padding:6px 13px;cursor:pointer}
   button:hover{color:var(--ink)}
-  .card{background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:18px 18px 12px}
-  .legend{display:flex;gap:20px;align-items:center;flex-wrap:wrap;font-size:13px;color:var(--ink-2);
-          margin-bottom:6px}
-  .key{display:inline-flex;align-items:center;gap:8px}
-  .lk{width:18px;height:2px;border-radius:1px;display:inline-block;position:relative}
-  .lk::after{content:"";position:absolute;left:5px;top:-3px;width:8px;height:8px;border-radius:50%;
-             background:inherit;box-shadow:0 0 0 2px var(--surface)}
-  .lk.a{background:var(--s1)} .lk.b{background:var(--s2)}
-  .key.ai .sw{width:14px;height:12px;border-radius:3px;background:var(--band);
-              border:1px solid var(--bandline);display:inline-block}
+
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:15px 14px 8px}
+  .panels{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px}
+  .ptitle{font-size:12.5px;font-weight:600;color:var(--ink);margin:0 0 2px}
+  .pnote{font-size:11.5px;color:var(--muted);margin:0 0 8px;line-height:1.45}
   svg{display:block;width:100%;height:auto;overflow:visible}
   .gl{stroke:var(--grid);stroke-width:1}
-  .axis{stroke:var(--axis);stroke-width:2;stroke-linecap:square}
-  .atick{stroke:var(--axis);stroke-width:1.5}
-  .ticky,.tickx{font-size:11px;fill:var(--ink-2);font-variant-numeric:tabular-nums}
+  .baseline{stroke:var(--base);stroke-width:1}
+  .ticky,.tickx{font-size:10.5px;fill:var(--muted);font-variant-numeric:tabular-nums}
   .tickx.b{font-size:11.5px;fill:var(--ink);font-weight:600}
-  .axtitle{font-size:11.5px;fill:var(--ink);font-weight:600;letter-spacing:.02em}
-  .endlab{font-size:12px;font-weight:600;fill:var(--ink)}
-  .aitag{font-size:10.5px;fill:var(--ink-2);font-weight:600;letter-spacing:.03em}
-  #tableview{margin-top:14px;background:var(--surface);border:1px solid var(--border);
+  .cap{font-size:11.5px;font-weight:600;fill:var(--ink);font-variant-numeric:tabular-nums}
+  .axtitle{font-size:11px;fill:var(--ink-2);font-weight:600;letter-spacing:.04em}
+  .aitag{font-size:10.5px;fill:var(--ink-2);font-weight:600;letter-spacing:.05em}
+
+  .aistrip{margin-top:12px;background:var(--surface);border:1px solid var(--border);
+           border-radius:11px;padding:12px 16px;font-size:12.5px;color:var(--ink-2);line-height:1.6}
+  .aistrip b{color:var(--ink);font-weight:600}
+  #tableview{margin-top:12px;background:var(--surface);border:1px solid var(--border);
              border-radius:11px;padding:14px 16px;overflow-x:auto}
-  table{border-collapse:collapse;width:100%;font-size:12.5px;min-width:640px}
+  table{border-collapse:collapse;width:100%;font-size:12.5px;min-width:700px}
   th,td{padding:7px 10px;text-align:right;border-bottom:1px solid var(--grid);
         font-variant-numeric:tabular-nums;white-space:nowrap}
   th{color:var(--ink-2);font-weight:600;font-size:11.5px}
   th:first-child,td:first-child,th:nth-child(2),td:nth-child(2){text-align:left;font-variant-numeric:normal}
-  tr.ai td{background:var(--band)}
+  tr.ai td{background:var(--wash)}
+  tr.tot td{font-weight:600;border-top:1px solid var(--base)}
+  tr.excl td{color:var(--muted)}
   #tip{position:fixed;pointer-events:none;opacity:0;transition:opacity .1s;z-index:9;
        background:var(--surface);border:1px solid var(--border);border-radius:9px;
-       padding:10px 12px;font-size:12.5px;box-shadow:0 8px 26px rgba(0,0,0,.15);min-width:196px}
+       padding:10px 12px;font-size:12.5px;box-shadow:0 8px 26px rgba(0,0,0,.16);min-width:214px}
   #tip .t{font-weight:600;margin-bottom:7px}
-  #tip .r{display:flex;align-items:center;gap:9px;margin-top:4px}
-  #tip .r .k{width:12px;height:2px;border-radius:1px;flex:none}
+  #tip .r{display:flex;align-items:center;gap:10px;margin-top:4px}
   #tip .n{color:var(--ink-2);font-size:11.5px}
-  #tip .v{font-weight:600;margin-left:auto;font-variant-numeric:tabular-nums}
-  .note{font-size:12.5px;color:var(--muted);line-height:1.65;margin-top:16px;max-width:88ch}
+  #tip .val{font-weight:600;margin-left:auto;font-variant-numeric:tabular-nums}
+  .note{font-size:12.5px;color:var(--muted);line-height:1.65;margin-top:18px;max-width:90ch}
   .note b{color:var(--ink-2);font-weight:600}
+  @media (max-width:860px){ .tiles,.panels{grid-template-columns:1fr} }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>Show-up vs Sales, week by week</h1>
-  <p class="sub">BFM Workshops B169 → B177. Both lines are <b>indexed to B169 = 100</b> so two very
-     different quantities (≈2,500 attendees vs ≈250 orders) share one honest y-axis and their shapes
-     can be compared directly. Hover any week for the real numbers. <b>B175–B176 are the AI-calling
-     weeks</b>, shaded below.</p>
+  <h1>Registrations → Show-up → Sales</h1>
+  <p class="sub">BFM Workshops. Every rate is measured <b>against that batch's paid
+     registrations</b> — the only denominator that makes weeks of different size comparable.
+     <b>B175 and B176 ran with AI reminder calling</b>; B173 and B174 had none, so they are the
+     control. <b>B177 is shown but excluded from both groups</b> — it was only partly called, and
+     its exports are richer than the others'. Hover any column for the underlying counts.</p>
+
+  <div class="tiles" id="tiles"></div>
 
   <div class="bar-row">
-    <span style="font-size:12.5px;color:var(--ink-2)">Sales line:</span>
+    <span style="font-size:12.5px;color:var(--ink-2)">View:</span>
     <span class="seg">
-      <button id="m-ord" aria-pressed="true">Orders</button>
-      <button id="m-rev" aria-pressed="false">Revenue</button>
+      <button id="m-abs" aria-pressed="true">Rates</button>
+      <button id="m-rel" aria-pressed="false">Relative to control</button>
     </span>
     <span class="spacer"></span>
-    <button id="tgl-table" aria-expanded="true">Hide table</button>
-    <button id="tgl-theme">Toggle theme</button>
+    <button id="tgl-table2" aria-expanded="true">Hide table</button>
+    <button id="tgl-theme2">Toggle theme</button>
   </div>
 
-  <div class="card">
-    <div class="legend">
-      <span class="key"><span class="lk a"></span> Unique show-up</span>
-      <span class="key"><span class="lk b"></span> <span id="lg2">Orders</span></span>
-      <span class="key ai"><span class="sw"></span> AI-calling weeks</span>
+  <div class="bar-row" style="margin-top:0">
+    <span class="legend">
+      <span class="key"><span class="sw d1"></span> <span id="lg1">Show-up % of registrations</span></span>
+      <span class="key"><span class="lk"></span> <span id="lg2">Order % of registrations</span></span>
+      <span class="key"><span class="swband"></span> AI-calling weeks</span>
+      <span class="key"><span class="ring"></span> Excluded from the comparison</span>
+    </span>
+    <span class="spacer"></span>
+  </div>
+
+  <div class="card"><div id="plot"></div></div>
+
+  <div class="panels">
+    <div class="card">
+      <p class="ptitle">Funnel — control vs AI-called</p>
+      <p class="pnote">Each stage as a share of that group's registrations. B177 excluded.</p>
+      <div id="pf"></div>
     </div>
-    <div id="plot"></div>
+    <div class="card">
+      <p class="ptitle">Calling coverage per batch</p>
+      <p class="pnote">Share of registrants dialled, and the share that answered.</p>
+      <div id="pc"></div>
+    </div>
+    <div class="card">
+      <p class="ptitle">Collected per batch</p>
+      <p class="pnote">Money actually received. Completed orders only.</p>
+      <div id="pr"></div>
+    </div>
   </div>
 
+  <div class="card" style="margin-top:12px">
+    <p class="ptitle">Registrations, show-up and orders — actual counts</p>
+    <p class="pnote" style="max-width:92ch">One shared count axis starting at zero, no indexing and
+       no rescaling. The orders line sits low and nearly flat because that is what it does — 221 to
+       268 people a week against registrations in the thousands. B177 is drawn hollow and dotted:
+       its show-up came from a richer export than the other four, so its jump is better data rather
+       than a better week.</p>
+    <div class="legend" style="margin:2px 0 4px">
+      <span class="key"><span class="sw" style="background:var(--base)"></span> Registrations</span>
+      <span class="key"><span class="sw" style="background:var(--s1)"></span> Showed up</span>
+      <span class="key"><span class="sw" style="background:var(--s2)"></span> Orders</span>
+      <span class="key"><span class="swband"></span> AI-calling weeks</span>
+    </div>
+    <div id="pidx"></div>
+  </div>
+
+  <div class="aistrip" id="aistrip"></div>
   <div id="tableview"></div>
   <p class="note" id="notes"></p>
 </div>
 <div id="tip" role="status" aria-live="polite"></div>
 
 <script>
-const DATA = [
-  {b:'B169', wk:'06–08 Jun', uniq:2577, ord:291, rev:210592.60},
-  {b:'B170', wk:'13–15 Jun', uniq:3023, ord:271, rev:223968.00},
-  {b:'B171', wk:'20–22 Jun', uniq:2631, ord:268, rev:224550.28},
-  {b:'B172', wk:'27–29 Jun', uniq:2883, ord:251, rev:210590.20},
-  {b:'B173', wk:'04–06 Jul', uniq:2267, ord:221, rev:167976.00},
-  {b:'B174', wk:'11–13 Jul', uniq:3125, ord:268, rev:189618.00},
-  {b:'B175', wk:'18–20 Jul', uniq:2567, ord:244, rev:203700.80, ai:true},
-  {b:'B176', wk:'25–27 Jul', uniq:2625, ord:233, rev:175651.20, ai:true},
-  {b:'B177', wk:'01–03 Aug', uniq:2914, ord:234, rev:127264.00, partial:true}
+/* ---- the batches ----------------------------------------------------------
+   reg     = paid registrations for that batch (₹99, status "captured")
+   showed  = registrants CONFIRMED into that batch's Zoom export. A floor, not a
+             count: B173–B176 exports carry no e-mail column (0.0–0.1% of rows)
+             so attendees match by display name only, which recovers ~78% of
+             what e-mail matching finds. B177's export does carry e-mails, which
+             is the whole reason it sits so much higher — better data, not a
+             better week. It is therefore excluded from the comparison.
+   orders  = anyone who received the Silver Bundle, paid or free
+   rev     = money actually received, completed orders only
+   raw     = distinct Zoom display names — the retired "unique show-up"
+   called / reached = registrants dialled / answered                         */
+const B = [
+  {b:'B173', wk:'04–06 Jul', reg:1702, showed: 580, orders:221, rev:167976.00,
+   raw:2102, called: 205, reached: 134, ai:false},
+  {b:'B174', wk:'11–13 Jul', reg:2454, showed: 885, orders:268, rev:189618.00,
+   raw:2902, called: 282, reached: 224, ai:false},
+  {b:'B175', wk:'18–20 Jul', reg:1862, showed: 699, orders:244, rev:203700.80,
+   raw:2413, called:1787, reached:1119, ai:true},
+  {b:'B176', wk:'25–27 Jul', reg:1989, showed: 729, orders:233, rev:175651.20,
+   raw:2454, called:1988, reached:1617, ai:true},
+  {b:'B177', wk:'01–03 Aug', reg:2056, showed:1508, orders:382, rev:127264.00,
+   raw:2818, called: 672, reached: 543, ai:false, excl:true}
 ];
-const num  = n => n.toLocaleString('en-IN');
+
+const num  = n => Math.round(n).toLocaleString('en-IN');
 const inr  = n => '₹' + Math.round(n).toLocaleString('en-IN');
-const NS   = 'http://www.w3.org/2000/svg';
-const el   = (n,at={}) => { const e = document.createElementNS(NS,n);
-  for (const k in at) e.setAttribute(k,at[k]); return e; };
+const pc1  = v => v.toFixed(1) + '%';
+const pc2  = v => v.toFixed(2) + '%';
+function sgn1(v){ return (v>=0?'+':'') + v.toFixed(1) + '%'; }
 
-let METRIC = 'ord';                       // 'ord' | 'rev'
-const salesOf = d => METRIC === 'ord' ? d.ord : d.rev;
-const salesName = () => METRIC === 'ord' ? 'Orders' : 'Revenue';
-const salesFmt  = v => METRIC === 'ord' ? num(v) : inr(v);
+const sum = (a,k) => a.reduce((s,d)=>s+d[k],0);
+const CMP = B.filter(d=>!d.excl);                 /* the comparable four */
+const CTL = CMP.filter(d=>!d.ai), AI = CMP.filter(d=>d.ai);
+const rate = (g,k) => sum(g,k)/sum(g,'reg')*100;
 
-const W=960, H=470, M={t:26,r:96,b:74,l:64};
+const NS='http://www.w3.org/2000/svg';
+const el=(n,at={})=>{const e=document.createElementNS(NS,n);for(const k in at)e.setAttribute(k,at[k]);return e;};
+
+/* ---- headline tiles ---- */
+const TILES = [
+  {lab:'Registrations', a:sum(CTL,'reg'), b:sum(AI,'reg'), fmt:num, delta:null,
+   who:'Audience size, not a result — it sets the denominator for both rates.'},
+  {lab:'Show-up rate', a:rate(CTL,'showed'), b:rate(AI,'showed'), fmt:pc2,
+   delta:{pp:rate(AI,'showed')-rate(CTL,'showed'), rel:rate(AI,'showed')/rate(CTL,'showed')-1,
+          p:'p = 0.09'},
+   who:'Registrants confirmed into the Zoom session. A floor — see the notes.'},
+  {lab:'Order rate', a:rate(CTL,'orders'), b:rate(AI,'orders'), fmt:pc2,
+   delta:{pp:rate(AI,'orders')-rate(CTL,'orders'), rel:rate(AI,'orders')/rate(CTL,'orders')-1,
+          p:'p = 0.40'},
+   who:'Bundles handed out per registration, paid or free.'}
+];
+const tiles = document.getElementById('tiles');
+TILES.forEach(t=>{
+  const c=document.createElement('div'); c.className='tile';
+  const l=document.createElement('div'); l.className='lab'; l.textContent=t.lab;
+  const p=document.createElement('div'); p.className='pair';
+  const mk=(v,tag)=>{const s=document.createElement('span'); s.className='v';
+    const g=document.createElement('span'); g.className='vtag'; g.textContent=tag;
+    s.append(g,document.createTextNode(t.fmt(v))); return s;};
+  const ar=document.createElement('span'); ar.className='arrow'; ar.textContent='→';
+  p.append(mk(t.a,'control '), ar, mk(t.b,'AI-called '));
+  c.append(l,p);
+  if (t.delta){
+    const d=document.createElement('div'); d.className='delta';
+    const up=document.createElement('span'); up.textContent = t.delta.pp>=0 ? '▲' : '▼';
+    const tx=document.createElement('span');
+    tx.textContent = (t.delta.pp>=0?'+':'') + t.delta.pp.toFixed(2) + ' pp  ·  ' +
+                     (t.delta.rel>=0?'+':'') + (t.delta.rel*100).toFixed(1) + '% relative';
+    const sg=document.createElement('span'); sg.className='sig';
+    sg.textContent='not significant, ' + t.delta.p;
+    d.append(up,tx,sg); c.appendChild(d);
+  }
+  const w=document.createElement('div'); w.className='who'; w.textContent=t.who;
+  c.appendChild(w); tiles.appendChild(c);
+});
+
+/* ---- combo chart: bars = show-up %, line = order %, one shared % axis ---- */
+const W=780,H=400,M={t:34,r:30,b:76,l:56};
 const PW=W-M.l-M.r, PH=H-M.t-M.b;
+const BARW=24;
+
+const showupPct = d => d.showed/d.reg*100;
+const orderPct  = d => d.orders/d.reg*100;
+
+const BASE = {showup: rate(CTL,'showed'), order: rate(CTL,'orders')};
+const showupRel = d => (showupPct(d)/BASE.showup - 1) * 100;
+const orderRel  = d => (orderPct(d) /BASE.order  - 1) * 100;
+
+let MODE = 'abs';
+const VIEW = {
+  abs: {bar:showupPct, line:orderPct, barFmt:pc1, lineFmt:pc2,
+        lo:0, hi:80, ticks:[0,20,40,60,80], tick:v=>v+'%',
+        axis:'% OF REGISTRATIONS',
+        title:'Show-up rate and order rate per batch, each as a percentage of that batch’s registrations'},
+  rel: {bar:showupRel, line:orderRel, barFmt:sgn1, lineFmt:sgn1,
+        lo:-20, hi:120, ticks:[-20,0,20,40,60,80,100,120], tick:v=>(v>0?'+':'')+v+'%',
+        axis:'% CHANGE VS CONTROL',
+        title:'Show-up rate and order rate per batch, as percentage change against the two uncalled control weeks'}
+};
+
+function barPath(x,y0,yv,w,r){
+  const up = yv <= y0, h = Math.abs(y0-yv);
+  r = Math.max(0, Math.min(r, h, w/2));
+  return up
+    ? `M${x},${y0} L${x},${yv+r} Q${x},${yv} ${x+r},${yv} L${x+w-r},${yv} Q${x+w},${yv} ${x+w},${yv+r} L${x+w},${y0} Z`
+    : `M${x},${y0} L${x},${yv-r} Q${x},${yv} ${x+r},${yv} L${x+w-r},${yv} Q${x+w},${yv} ${x+w},${yv-r} L${x+w},${y0} Z`;
+}
 
 function draw(){
-  const host = document.getElementById('plot');
-  host.textContent = '';
-  const base = {u:DATA[0].uniq, s:salesOf(DATA[0])};
-  const pts = DATA.map((d,i)=>({d,i, u:d.uniq/base.u*100, s:salesOf(d)/base.s*100}));
-  const lo = Math.min(...pts.flatMap(p=>[p.u,p.s])), hi = Math.max(...pts.flatMap(p=>[p.u,p.s]));
-  const yMin = Math.floor((lo-8)/10)*10, yMax = Math.ceil((hi+8)/10)*10;
-  const x = i => M.l + (PW/(DATA.length-1))*i;
-  const y = v => M.t + PH - (v-yMin)/(yMax-yMin)*PH;
+  const V=VIEW[MODE];
+  const host=document.getElementById('plot'); host.textContent='';
+  const svg=el('svg',{viewBox:`0 0 ${W} ${H}`,role:'img'});
+  const ttl=el('title'); ttl.textContent=V.title; svg.appendChild(ttl);
 
-  const svg = el('svg',{viewBox:`0 0 ${W} ${H}`, role:'img'});
-  const ttl = el('title'); ttl.textContent =
-    'Unique show-up and ' + salesName().toLowerCase() + ' per week, indexed to B169 = 100';
-  svg.appendChild(ttl);
+  const y=v=>M.t+PH-((v-V.lo)/(V.hi-V.lo))*PH;
+  const y0=y(0);
+  const band=PW/B.length;
+  const x=i=>M.l+band*i+band/2;
 
-  /* AI-calling band */
-  const ai = pts.filter(p=>p.d.ai);
+  const ai=B.map((d,i)=>({d,i})).filter(p=>p.d.ai);
   if (ai.length){
-    const half = PW/(DATA.length-1)/2;
-    const x0 = x(ai[0].i)-half, x1 = x(ai[ai.length-1].i)+half;
-    svg.appendChild(el('rect',{x:x0,y:M.t,width:x1-x0,height:PH,fill:'var(--band)'}));
-    svg.appendChild(el('line',{x1:x0,x2:x0,y1:M.t,y2:M.t+PH,stroke:'var(--bandline)','stroke-width':1}));
-    svg.appendChild(el('line',{x1:x1,x2:x1,y1:M.t,y2:M.t+PH,stroke:'var(--bandline)','stroke-width':1}));
-    const tag = el('text',{x:(x0+x1)/2,y:M.t-9,class:'aitag','text-anchor':'middle'});
-    tag.textContent = 'AI-CALLING WEEKS'; svg.appendChild(tag);
+    const x0=M.l+band*ai[0].i, x1=M.l+band*(ai[ai.length-1].i+1);
+    svg.appendChild(el('rect',{x:x0,y:M.t,width:x1-x0,height:PH,fill:'var(--wash)'}));
+    [x0,x1].forEach(xx=>svg.appendChild(el('line',{x1:xx,x2:xx,y1:M.t,y2:M.t+PH,
+      stroke:'var(--bandline)','stroke-width':1})));
+    const tag=el('text',{x:(x0+x1)/2,y:M.t-12,class:'aitag','text-anchor':'middle'});
+    tag.textContent='AI CALLING LIVE'; svg.appendChild(tag);
   }
 
-  /* gridlines + emphasised Y axis */
-  for (let v=yMin; v<=yMax; v+=10){
-    svg.appendChild(el('line',{x1:M.l,x2:M.l+PW,y1:y(v),y2:y(v),class:'gl'}));
-    svg.appendChild(el('line',{x1:M.l-6,x2:M.l,y1:y(v),y2:y(v),class:'atick'}));
-    const t = el('text',{x:M.l-11,y:y(v)+3.8,class:'ticky','text-anchor':'end'});
-    t.textContent = v; svg.appendChild(t);
+  V.ticks.forEach(v=>{
+    svg.appendChild(el('line',{x1:M.l,x2:M.l+PW,y1:y(v),y2:y(v),class:v===0?'baseline':'gl'}));
+    const t=el('text',{x:M.l-11,y:y(v)+3.8,class:'ticky','text-anchor':'end'});
+    t.textContent=V.tick(v); svg.appendChild(t);
+  });
+  if (MODE==='rel'){
+    const lab=el('text',{x:M.l+4,y:y0-7,class:'aitag'});
+    lab.textContent='CONTROL BASELINE  (B173–B174)'; svg.appendChild(lab);
   }
-  /* the 100 baseline — where both series start */
-  if (yMin < 100 && yMax > 100){
-    svg.appendChild(el('line',{x1:M.l,x2:M.l+PW,y1:y(100),y2:y(100),
-      stroke:'var(--ink-2)','stroke-width':1,opacity:'.5'}));
-  }
+  const yt=el('text',{class:'axtitle','text-anchor':'middle',
+    transform:`translate(${M.l-42},${M.t+PH/2}) rotate(-90)`});
+  yt.textContent=V.axis; svg.appendChild(yt);
 
-  svg.appendChild(el('line',{x1:M.l,x2:M.l,y1:M.t-4,y2:M.t+PH,class:'axis'}));          // Y axis
-  svg.appendChild(el('line',{x1:M.l,x2:M.l+PW+8,y1:M.t+PH,y2:M.t+PH,class:'axis'}));    // X axis
-
-  const yt = el('text',{class:'axtitle','text-anchor':'middle',
-    transform:`translate(${M.l-46},${M.t+PH/2}) rotate(-90)`});
-  yt.textContent = 'INDEX  (B169 = 100)'; svg.appendChild(yt);
-  const xt = el('text',{x:M.l+PW/2,y:H-14,class:'axtitle','text-anchor':'middle'});
-  xt.textContent = 'WEEK  (workshop batch)'; svg.appendChild(xt);
-
-  /* x ticks + labels */
-  pts.forEach(p => {
-    svg.appendChild(el('line',{x1:x(p.i),x2:x(p.i),y1:M.t+PH,y2:M.t+PH+6,class:'atick'}));
-    const a = el('text',{x:x(p.i),y:M.t+PH+21,class:'tickx b','text-anchor':'middle'});
-    a.textContent = p.d.b + (p.d.partial?'*':''); svg.appendChild(a);
-    const b = el('text',{x:x(p.i),y:M.t+PH+35,class:'tickx','text-anchor':'middle',opacity:'.85'});
-    b.textContent = p.d.wk; svg.appendChild(b);
+  /* bars — show-up. An excluded batch is drawn hollow. */
+  B.forEach((d,i)=>{
+    const v=V.bar(d), yv=y(v), above=yv<=y0;
+    const at={d:barPath(x(i)-BARW/2,y0,yv,BARW,4)};
+    if (d.excl){ at.fill='none'; at.stroke='var(--s1)'; at['stroke-width']=2;
+                 at['stroke-dasharray']='4 3'; }
+    else at.fill='var(--s1)';
+    svg.appendChild(el('path',at));
+    const yl=y(V.line(d));
+    let ly = above ? yv-10 : yv+18;
+    if (Math.abs(yv-yl) < 22) ly = Math.min(yv,yl) - 15;
+    const t=el('text',{x:x(i),y:ly,class:'cap','text-anchor':'middle'});
+    if (d.excl) t.setAttribute('opacity','.6');
+    t.textContent=V.barFmt(v); svg.appendChild(t);
   });
 
-  /* lines */
-  const line = (key,color) => {
-    const solid = pts.filter(p=>!p.d.partial);
-    svg.appendChild(el('path',{fill:'none',stroke:color,'stroke-width':2,
-      'stroke-linejoin':'round','stroke-linecap':'round',
-      d:solid.map((p,k)=>(k?'L':'M')+x(p.i)+','+y(p[key])).join(' ')}));
-    if (pts.some(p=>p.d.partial)){                       // faded tail into the partial week
-      const a = solid[solid.length-1], b = pts[pts.length-1];
-      svg.appendChild(el('path',{fill:'none',stroke:color,'stroke-width':2,opacity:'.4',
-        d:`M${x(a.i)},${y(a[key])} L${x(b.i)},${y(b[key])}`}));
-    }
-  };
-  line('u','var(--s1)'); line('s','var(--s2)');
-
-  /* markers + end labels */
-  [['u','var(--s1)','Show-up'],['s','var(--s2)',salesName()]].forEach(([key,color,name])=>{
-    pts.forEach(p=>{
-      svg.appendChild(el('circle',{cx:x(p.i),cy:y(p[key]),r:4.5,fill:color,
-        stroke:'var(--surface)','stroke-width':2, opacity:p.d.partial?'.5':'1'}));
-    });
-    const last = pts[pts.length-1];
-    const t = el('text',{x:x(last.i)+13,y:y(last[key])+4,class:'endlab'});
-    t.textContent = name; svg.appendChild(t);
+  /* line — orders. Solid across the comparable weeks, dotted into the excluded one. */
+  const solid = B.filter(d=>!d.excl);
+  const lineD = solid.map((d,k)=>(k?'L':'M')+x(B.indexOf(d))+','+y(V.line(d))).join(' ');
+  svg.appendChild(el('path',{fill:'none',stroke:'var(--surface)','stroke-width':6,
+    'stroke-linejoin':'round','stroke-linecap':'round',d:lineD}));
+  svg.appendChild(el('path',{fill:'none',stroke:'var(--s2)','stroke-width':2,
+    'stroke-linejoin':'round','stroke-linecap':'round',d:lineD}));
+  B.filter(d=>d.excl).forEach(d=>{
+    const i=B.indexOf(d), prev=B[i-1];
+    if (!prev) return;
+    svg.appendChild(el('path',{fill:'none',stroke:'var(--s2)','stroke-width':1.5,
+      opacity:'.4','stroke-dasharray':'2 4',
+      d:`M${x(i-1)},${y(V.line(prev))} L${x(i)},${y(V.line(d))}`}));
+  });
+  B.forEach((d,i)=>{
+    const v=V.line(d);
+    svg.appendChild(el('circle',{cx:x(i),cy:y(v),r:5,
+      fill:d.excl?'var(--surface)':'var(--s2)',
+      stroke:d.excl?'var(--s2)':'var(--surface)','stroke-width':d.excl?2.5:2}));
+    const t=el('text',{x:x(i)+21,y:y(v)+4,class:'cap','text-anchor':'start'});
+    if (d.excl) t.setAttribute('opacity','.6');
+    t.textContent=V.lineFmt(v); svg.appendChild(t);
   });
 
-  /* crosshair + hit columns */
-  const cross = el('line',{x1:0,x2:0,y1:M.t,y2:M.t+PH,stroke:'var(--ink-2)',
-    'stroke-width':1,opacity:'0'});
-  svg.appendChild(cross);
-  pts.forEach(p=>{
-    const half = PW/(DATA.length-1)/2;
-    const g = el('g',{tabindex:'0',role:'listitem'});
-    g.appendChild(el('rect',{x:x(p.i)-half,y:M.t,width:half*2,height:PH,
-      fill:'transparent',style:'cursor:crosshair'}));
-    const on = e => { cross.setAttribute('x1',x(p.i)); cross.setAttribute('x2',x(p.i));
-                      cross.setAttribute('opacity','.45'); show(p,e,g); };
+  /* x labels: batch · week · registration base */
+  B.forEach((d,i)=>{
+    svg.appendChild(el('line',{x1:x(i),x2:x(i),y1:M.t+PH,y2:M.t+PH+6,class:'baseline'}));
+    const a=el('text',{x:x(i),y:M.t+PH+22,class:'tickx b','text-anchor':'middle'});
+    a.textContent=d.b+(d.excl?' *':''); svg.appendChild(a);
+    const c=el('text',{x:x(i),y:M.t+PH+36,class:'tickx','text-anchor':'middle'});
+    c.textContent=d.wk; svg.appendChild(c);
+    const r=el('text',{x:x(i),y:M.t+PH+52,class:'tickx','text-anchor':'middle'});
+    r.textContent=num(d.reg)+' registrations'; svg.appendChild(r);
+  });
+
+  B.forEach((d,i)=>{
+    const g=el('g',{tabindex:'0',role:'listitem'});
+    g.appendChild(el('rect',{x:M.l+band*i,y:M.t,width:band,height:PH,
+      fill:'transparent',style:'cursor:pointer'}));
+    const on=e=>show(d,e,g);
     g.addEventListener('pointerenter',on);
     g.addEventListener('pointermove',e=>move(e));
     g.addEventListener('focus',e=>on(e));
-    g.addEventListener('pointerleave',off);
-    g.addEventListener('blur',off);
+    g.addEventListener('pointerleave',hide);
+    g.addEventListener('blur',hide);
     svg.appendChild(g);
   });
-  function off(){ cross.setAttribute('opacity','0'); hide(); }
 
   host.appendChild(svg);
-  document.getElementById('lg2').textContent = salesName();
 }
 
-/* tooltip */
-const tip = document.getElementById('tip');
-function show(p,e,g){
-  const d = p.d;
-  tip.textContent='';
-  const t = document.createElement('div'); t.className='t';
-  t.textContent = d.b + '  ·  ' + d.wk + (d.ai?'  · AI-calling':'') + (d.partial?'  · partial':'');
-  tip.appendChild(t);
-  [['var(--s1)','Unique show-up', num(d.uniq), 'index ' + p.u.toFixed(0)],
-   ['var(--s2)', salesName(), salesFmt(salesOf(d)), 'index ' + p.s.toFixed(0)]
-  ].forEach(([c,n,v,ix])=>{
-    const r = document.createElement('div'); r.className='r';
-    const k = document.createElement('span'); k.className='k'; k.style.background=c;
-    const nn= document.createElement('span'); nn.className='n'; nn.textContent = n+' · '+ix;
-    const vv= document.createElement('span'); vv.className='v'; vv.textContent = v;
-    r.append(k,nn,vv); tip.appendChild(r);
+/* ---- small panels ------------------------------------------------------ */
+const PW2=340, PH2=232;
+
+/* shared: horizontal grouped bars on a 0..max scale */
+function hbars(host, rows, opts){
+  const {max, fmt, colors, labels, left=78, right=54, top=6, gap=6, rowH=opts.rowH||15} = opts;
+  const inner = PW2-left-right;
+  const H = top + rows.length*(rowH*colors.length + gap + 12) + 18;
+  const el2=(n,a)=>el(n,a);
+  const svg=el('svg',{viewBox:`0 0 ${PW2} ${H}`,role:'img'});
+  const ttl=el('title'); ttl.textContent=opts.title; svg.appendChild(ttl);
+  const x=v=>left + (v/max)*inner;
+
+  /* gridlines */
+  (opts.ticks||[0,max]).forEach(v=>{
+    svg.appendChild(el('line',{x1:x(v),x2:x(v),y1:top,y2:H-16,
+      class:v===0?'baseline':'gl'}));
+    const t=el('text',{x:x(v),y:H-4,class:'ticky','text-anchor':'middle'});
+    t.textContent=opts.tick? opts.tick(v) : v; svg.appendChild(t);
   });
-  const r = document.createElement('div'); r.className='r';
-  const nn= document.createElement('span'); nn.className='n';
-  nn.textContent = 'Orders per 100 show-ups';
-  const vv= document.createElement('span'); vv.className='v';
-  vv.textContent = (d.ord/d.uniq*100).toFixed(1);
-  r.append(nn,vv); tip.appendChild(r);
+
+  rows.forEach((r,i)=>{
+    const y0 = top + i*(rowH*colors.length + gap + 12);
+    const nm=el('text',{x:left-8,y:y0+rowH*colors.length/2+4,class:'tickx','text-anchor':'end'});
+    nm.textContent=r.label; svg.appendChild(nm);
+    r.vals.forEach((v,k)=>{
+      const yy=y0+k*rowH;
+      const w=Math.max(x(v)-left,1);
+      const col = r.color || colors[k];
+      const at={x:left,y:yy+1,width:w,height:rowH-3,rx:2};
+      if (r.hollow){ at.fill='none'; at.stroke=col; at['stroke-width']=1.6;
+                     at['stroke-dasharray']='3 2'; }
+      else at.fill=col;
+      svg.appendChild(el('rect',at));
+      const t=el('text',{x:left+w+7,y:yy+rowH-4,class:'cap'});
+      if (r.hollow) t.setAttribute('opacity','.6');
+      t.setAttribute('style','font-size:10.5px');
+      t.textContent=fmt(v); svg.appendChild(t);
+    });
+  });
+  host.textContent=''; host.appendChild(svg);
+
+  if (labels){
+    const lg=document.createElement('div');
+    lg.setAttribute('style','display:flex;gap:14px;flex-wrap:wrap;font-size:11px;'+
+      'color:var(--ink-2);margin:2px 0 6px');
+    labels.forEach((L,k)=>{
+      const s=document.createElement('span');
+      s.setAttribute('style','display:inline-flex;align-items:center;gap:6px');
+      const sw=document.createElement('span');
+      sw.setAttribute('style','width:10px;height:10px;border-radius:2px;background:'+colors[k]);
+      s.append(sw,document.createTextNode(L)); lg.appendChild(s);
+    });
+    host.appendChild(lg);
+  }
+}
+
+/* ---- indexed comparison: reg / showed / orders, all B173 = 100 ---------- */
+const WI=780, HI=340, MI={t:30,r:96,b:66,l:58};
+function drawIndexed(){
+  const host=document.getElementById('pidx'); host.textContent='';
+  const rows=B;                                     /* all five, B177 marked */
+  const SER=[{k:'reg',    c:'var(--base)', n:'Registrations'},
+             {k:'showed', c:'var(--s1)',   n:'Showed up'},
+             {k:'orders', c:'var(--s2)',   n:'Orders'}];
+
+  const PWI=WI-MI.l-MI.r, PHI=HI-MI.t-MI.b;
+  const hi=Math.max(...rows.flatMap(d=>SER.map(s=>d[s.k])));
+  const yMax=Math.ceil(hi/500)*500;                 /* zero-based count axis */
+  const step=PWI/(rows.length-1);
+  const x=i=>MI.l+step*i, y=v=>MI.t+PHI-v/yMax*PHI;
+
+  const svg=el('svg',{viewBox:`0 0 ${WI} ${HI}`,role:'img'});
+  const ttl=el('title');
+  ttl.textContent='Registrations, confirmed show-up and orders per batch as actual counts on a '+
+                  'single zero-based axis';
+  svg.appendChild(ttl);
+
+  /* AI band */
+  const ai=rows.map((d,i)=>({d,i})).filter(p=>p.d.ai);
+  if (ai.length){
+    const x0=x(ai[0].i)-step/2, x1=x(ai[ai.length-1].i)+step/2;
+    svg.appendChild(el('rect',{x:x0,y:MI.t,width:x1-x0,height:PHI,fill:'var(--wash)'}));
+    [x0,x1].forEach(xx=>svg.appendChild(el('line',{x1:xx,x2:xx,y1:MI.t,y2:MI.t+PHI,
+      stroke:'var(--bandline)','stroke-width':1})));
+    const tag=el('text',{x:(x0+x1)/2,y:MI.t-10,class:'aitag','text-anchor':'middle'});
+    tag.textContent='AI CALLING LIVE'; svg.appendChild(tag);
+  }
+
+  for (let v=0; v<=yMax; v+=500){
+    svg.appendChild(el('line',{x1:MI.l,x2:MI.l+PWI,y1:y(v),y2:y(v),
+      class:v===0?'baseline':'gl'}));
+    const t=el('text',{x:MI.l-10,y:y(v)+3.8,class:'ticky','text-anchor':'end'});
+    t.textContent=num(v); svg.appendChild(t);
+  }
+  const yt=el('text',{class:'axtitle','text-anchor':'middle',
+    transform:`translate(${MI.l-46},${MI.t+PHI/2}) rotate(-90)`});
+  yt.textContent='PEOPLE'; svg.appendChild(yt);
+
+  rows.forEach((d,i)=>{
+    svg.appendChild(el('line',{x1:x(i),x2:x(i),y1:MI.t+PHI,y2:MI.t+PHI+6,class:'baseline'}));
+    const a=el('text',{x:x(i),y:MI.t+PHI+22,class:'tickx b','text-anchor':'middle'});
+    a.textContent=d.b+(d.excl?' *':''); svg.appendChild(a);
+    const c=el('text',{x:x(i),y:MI.t+PHI+36,class:'tickx','text-anchor':'middle'});
+    c.textContent=d.wk; svg.appendChild(c);
+  });
+
+  const solid=rows.filter(d=>!d.excl);
+  SER.forEach(s=>{
+    svg.appendChild(el('path',{fill:'none',stroke:s.c,'stroke-width':2.2,
+      'stroke-linejoin':'round','stroke-linecap':'round',
+      d:solid.map((d,k)=>(k?'L':'M')+x(rows.indexOf(d))+','+y(d[s.k])).join(' ')}));
+    rows.filter(d=>d.excl).forEach(d=>{
+      const i=rows.indexOf(d), prev=rows[i-1];
+      if (!prev) return;
+      svg.appendChild(el('path',{fill:'none',stroke:s.c,'stroke-width':1.5,opacity:'.4',
+        'stroke-dasharray':'2 4',
+        d:`M${x(i-1)},${y(prev[s.k])} L${x(i)},${y(d[s.k])}`}));
+    });
+    rows.forEach((d,i)=>{
+      svg.appendChild(el('circle',{cx:x(i),cy:y(d[s.k]),r:d.excl?5:4.5,
+        fill:d.excl?'var(--surface)':s.c,
+        stroke:d.excl?s.c:'var(--surface)','stroke-width':d.excl?2.5:2}));
+      const t=el('text',{x:x(i),y:y(d[s.k])-11,class:'cap','text-anchor':'middle'});
+      t.setAttribute('style','font-size:10.5px');
+      if (d.excl) t.setAttribute('opacity','.6');
+      t.textContent=num(d[s.k]); svg.appendChild(t);
+    });
+    const last=rows[rows.length-1];
+    const lb=el('text',{x:x(rows.length-1)+12,y:y(last[s.k])+4,class:'cap',fill:s.c});
+    lb.textContent=s.n; svg.appendChild(lb);
+  });
+
+  host.appendChild(svg);
+}
+
+function drawPanels(){
+  /* A — funnel, control vs AI, each stage as % of its own registrations */
+  hbars(document.getElementById('pf'), [
+    {label:'Registered', vals:[100, 100]},
+    {label:'Showed up',  vals:[rate(CTL,'showed'), rate(AI,'showed')]},
+    {label:'Ordered',    vals:[rate(CTL,'orders'), rate(AI,'orders')]}
+  ], {max:100, ticks:[0,50,100], tick:v=>v+'%', fmt:v=>v.toFixed(1)+'%',
+      colors:['var(--base)','var(--s1)'], labels:['Control','AI-called'], rowH:15,
+      title:'Funnel: registered, showed up and ordered, as a share of registrations, '+
+            'control weeks against AI-called weeks'});
+
+  /* B — calling coverage per batch */
+  hbars(document.getElementById('pc'),
+    B.map(d=>({label:d.b+(d.excl?' *':''), hollow:d.excl,
+               vals:[d.called/d.reg*100, d.reached/d.reg*100]})),
+    {max:100, ticks:[0,50,100], tick:v=>v+'%', fmt:v=>v.toFixed(0)+'%',
+     colors:['var(--s1)','var(--s2)'], labels:['Dialled','Answered'], rowH:11, left:44,
+     title:'Share of each batch’s registrants dialled by the AI caller, and the share that answered'});
+
+  /* C — collected per batch */
+  const maxRev = Math.max(...B.map(d=>d.rev));
+  hbars(document.getElementById('pr'),
+    B.map(d=>({label:d.b+(d.excl?' *':''), hollow:d.excl, vals:[d.rev]})),
+    {max:maxRev, ticks:[0,maxRev], tick:v=>v?'₹'+Math.round(v/1000)+'k':'0',
+     fmt:v=>'₹'+Math.round(v/1000)+'k', colors:['var(--s2)'], rowH:16, left:44, right:60,
+     title:'Money actually received per batch, completed orders only'});
+}
+
+/* ---- tooltip ---- */
+const tip=document.getElementById('tip');
+function show(d,e,g){
+  tip.textContent='';
+  const t=document.createElement('div'); t.className='t';
+  t.textContent = d.b+'  ·  '+d.wk+(d.excl?'  ·  excluded'
+                                   :d.ai?'  ·  AI calling live':'  ·  control week');
+  tip.appendChild(t);
+  [['Registrations', num(d.reg)],
+   ['Showed up', num(d.showed)+'  ('+pc1(showupPct(d))+')'],
+   ['Orders', num(d.orders)+'  ('+pc2(orderPct(d))+')'],
+   ['Show-up vs control', sgn1(showupRel(d))],
+   ['Order rate vs control', sgn1(orderRel(d))],
+   ['Orders per 100 show-ups', (d.orders/d.showed*100).toFixed(1)],
+   ['Collected', inr(d.rev)],
+   ['Registrants dialled', d.called ? num(d.called)+'  ('+pc1(d.called/d.reg*100)+')' : '—'],
+   ['Calls answered', d.reached ? num(d.reached)+'  ('+pc1(d.reached/d.reg*100)+')' : '—'],
+   ['Raw Zoom names', num(d.raw)]
+  ].forEach(([n,v])=>{
+    const r=document.createElement('div'); r.className='r';
+    const nn=document.createElement('span'); nn.className='n'; nn.textContent=n;
+    const vv=document.createElement('span'); vv.className='val'; vv.textContent=v;
+    r.append(nn,vv); tip.appendChild(r);
+  });
   tip.style.opacity=1;
   if (g && !e.clientX){ const bb=g.getBoundingClientRect();
-    move({clientX:bb.left+bb.width/2, clientY:bb.top+60}); } else move(e);
+    move({clientX:bb.left+bb.width/2, clientY:bb.top+70}); } else move(e);
 }
 function move(e){
   const w=tip.offsetWidth,h=tip.offsetHeight;
@@ -288,67 +604,121 @@ function move(e){
 }
 function hide(){ tip.style.opacity=0; }
 
-/* table view */
-const tv = document.getElementById('tableview');
+/* ---- calling-coverage strip ---- */
+const strip=document.getElementById('aistrip');
+(function(){
+  const b=s=>{const e=document.createElement('b'); e.textContent=s; return e;};
+  strip.append(b('Calling coverage. '),
+    document.createTextNode(
+      'B175: ' + num(AI[0].called) + ' of ' + num(AI[0].reg) + ' registrants dialled (' +
+      pc1(AI[0].called/AI[0].reg*100) + '), ' + pc1(AI[0].reached/AI[0].reg*100) + ' answered.  ·  ' +
+      'B176: ' + num(AI[1].called) + ' of ' + num(AI[1].reg) + ' (' +
+      pc1(AI[1].called/AI[1].reg*100) + '), ' + pc1(AI[1].reached/AI[1].reg*100) + ' answered.  ·  ' +
+      'B173 and B174 show ' + pc1(CTL[0].called/CTL[0].reg*100) + ' and ' +
+      pc1(CTL[1].called/CTL[1].reg*100) + ' dialled, but the call log only starts 16 Jul — after ' +
+      'both batches had already run. Those are other programmes reaching the same people later, ' +
+      'not workshop calling, which is what makes the two weeks a clean control.'));
+})();
+
+/* ---- table ---- */
+const tv=document.getElementById('tableview');
 function table(){
   tv.textContent='';
-  const t = document.createElement('table');
-  const hd = document.createElement('tr');
-  ['Batch','Week','Unique show-up','Index','Orders','Revenue','Index ('+salesName()+')','Orders per 100']
+  const t=document.createElement('table');
+  const hd=document.createElement('tr');
+  ['Batch','Week','AI calling','Registrations','Showed up','Show-up %','Orders','Order %',
+   'Orders / 100 show-ups','Collected']
     .forEach(n=>{const th=document.createElement('th');th.textContent=n;hd.appendChild(th);});
   const th_=document.createElement('thead'); th_.appendChild(hd); t.appendChild(th_);
   const tb=document.createElement('tbody');
-  const b0={u:DATA[0].uniq,s:salesOf(DATA[0])};
-  DATA.forEach(d=>{
-    const tr=document.createElement('tr'); if(d.ai) tr.className='ai';
-    [d.b, d.wk+(d.partial?' *':''), num(d.uniq), (d.uniq/b0.u*100).toFixed(0),
-     num(d.ord), inr(d.rev), (salesOf(d)/b0.s*100).toFixed(0), (d.ord/d.uniq*100).toFixed(1)]
-     .forEach(v=>{const td=document.createElement('td');td.textContent=v;tr.appendChild(td);});
+  B.forEach(d=>{
+    const tr=document.createElement('tr');
+    tr.className = d.excl ? 'excl' : (d.ai ? 'ai' : '');
+    [d.b+(d.excl?' *':''), d.wk, d.excl?'partly':(d.ai?'Yes':'No'),
+     num(d.reg), num(d.showed), pc1(showupPct(d)),
+     num(d.orders), pc2(orderPct(d)), (d.orders/d.showed*100).toFixed(1), inr(d.rev)]
+      .forEach(v=>{const td=document.createElement('td');td.textContent=v;tr.appendChild(td);});
+    tb.appendChild(tr);
+  });
+  [['Control  (B173–B174)',CTL],['AI calling  (B175–B176)',AI]].forEach(([lab,g])=>{
+    const tr=document.createElement('tr'); tr.className='tot';
+    [lab,'','', num(sum(g,'reg')), num(sum(g,'showed')), pc1(rate(g,'showed')),
+     num(sum(g,'orders')), pc2(rate(g,'orders')),
+     (sum(g,'orders')/sum(g,'showed')*100).toFixed(1), inr(sum(g,'rev'))]
+      .forEach(v=>{const td=document.createElement('td');td.textContent=v;tr.appendChild(td);});
     tb.appendChild(tr);
   });
   t.appendChild(tb); tv.appendChild(t);
 }
 
-/* notes */
+/* ---- notes ---- */
 const notes=document.getElementById('notes');
-[['Why indexed. ','Show-up runs in thousands and sales in hundreds. Plotting them on two separate '+
-  'y-scales would let the scales be set to invent a correlation; indexing both to their B169 value '+
-  'puts them on one real axis, where a gap between the lines is a genuine divergence.'],
- ['AI-calling weeks. ','B175 and B176 (shaded). Across those two weeks the batches produced 9.2 '+
-  'orders per 100 unique show-ups against 9.5 for the six earlier full weeks — inside the ordinary '+
-  'week-to-week spread, so no measurable lift or drop shows in this data.'],
- ['*B177. ','Its sales week is cut off at Aug 5, so the final segment of the sales line is faded — '+
-  'that dip is missing days, not lost demand. B168 is left out entirely (only its Monday session '+
-  'was in the Zoom export).'],
- ['Show-up dedupe. ','The Zoom Email column is blank on ~99.9% of rows, so unique attendees are '+
-  'deduped by normalised display name.']
+[['The two views. ','“Rates” plots the real percentages. “Relative to control” replots the same ' +
+  'batches as percentage change against the combined B173–B174 baseline (' +
+  pc2(BASE.showup) + ' show-up, ' + pc2(BASE.order) + ' order rate) — zero is the control, so the ' +
+  'height of a bar is the lift. The control weeks appear too, and their spread around zero is the ' +
+  'ordinary week-to-week noise any lift has to beat.'],
+ ['Reading the deltas. ','Against the two control weeks, the two AI-calling weeks move show-up ' +
+  pc2(BASE.showup) + ' → ' + pc2(rate(AI,'showed')) + ' (+' +
+  (rate(AI,'showed')-BASE.showup).toFixed(2) + ' pp, +' +
+  ((rate(AI,'showed')/BASE.showup-1)*100).toFixed(1) + '% relative) and order rate ' +
+  pc2(BASE.order) + ' → ' + pc2(rate(AI,'orders')) + ' (+' +
+  (rate(AI,'orders')-BASE.order).toFixed(2) + ' pp, +' +
+  ((rate(AI,'orders')/BASE.order-1)*100).toFixed(1) + '% relative). Both point the same way and ' +
+  'neither clears significance at this sample (p = 0.09 and p = 0.40) — two called batches is a ' +
+  'promising read, not proof. A third and fourth called week would settle it.'],
+ ['* B177 is excluded. ','It was only partly called — the call log stops on 27 July, part way ' +
+  'through its registration window, so 33% coverage understates what it actually received. Its ' +
+  'Zoom export also carries e-mail addresses where the other four do not, and its order file ' +
+  'covers the full sales window where the others stop at the two workshop days. Its 73.3% show-up ' +
+  'and 18.6% order rate therefore mean less went uncounted, not that it was a better week. It is ' +
+  'plotted hollow and dotted so the step is never read as a result.'],
+ ['How show-up is matched. ','The B173–B176 Zoom exports carry an e-mail on 0.0–0.1% of rows, so ' +
+  'registrants are matched to attendees by normalised display name. That undercounts anyone who ' +
+  'joined under a nickname or a device name — measured against B177, where e-mails exist, name ' +
+  'matching finds about 78% of the real total. So the true level is higher than 34–38%. The method ' +
+  'is identical across the four comparable weeks, so the comparison holds even though the absolute ' +
+  'level is conservative.'],
+ ['Orders. ','Anyone who received the Lifetime Silver Membership Bundle, paid or free — the agreed ' +
+  'definition. It is not a sales figure. In B177, the only week with order-level detail, 382 people ' +
+  'received the bundle and 18 paid; the other 364 used 100%-off coupons worth ₹24,71,527 in ' +
+  'forgone revenue. Collected is money actually received, completed orders only, so orders and ' +
+  'revenue describe different groups and their ratio is not an average order value.'],
+ ['The retired show-up figure. ','An earlier version plotted distinct Zoom display names and ' +
+  'indexed it. That count exceeded registrations in every week (118–137%), because one person ' +
+  'rejoining under a slightly different name counts twice while “iphone” (499 join records) and ' +
+  '“zoom user” (356) each collapse hundreds of people into one. 10,063 registrants produced 37,474 ' +
+  'join records, 3.7 each. It survives only in the hover panel, as “Raw Zoom names”.']
 ].forEach(([b,t])=>{
   const s=document.createElement('b'); s.textContent=b;
   notes.append(s,document.createTextNode(t),document.createElement('br'),document.createElement('br'));
 });
 
-/* controls */
-function setMetric(m){
-  METRIC=m;
-  document.getElementById('m-ord').setAttribute('aria-pressed', String(m==='ord'));
-  document.getElementById('m-rev').setAttribute('aria-pressed', String(m==='rev'));
-  draw(); table();
+/* ---- controls ---- */
+function setMode(m){
+  MODE=m;
+  document.getElementById('m-abs').setAttribute('aria-pressed',String(m==='abs'));
+  document.getElementById('m-rel').setAttribute('aria-pressed',String(m==='rel'));
+  document.getElementById('lg1').textContent =
+    m==='abs' ? 'Show-up % of registrations' : 'Show-up rate vs control';
+  document.getElementById('lg2').textContent =
+    m==='abs' ? 'Order % of registrations'  : 'Order rate vs control';
+  draw();
 }
-document.getElementById('m-ord').addEventListener('click',()=>setMetric('ord'));
-document.getElementById('m-rev').addEventListener('click',()=>setMetric('rev'));
-document.getElementById('tgl-table').addEventListener('click',e=>{
-  const on = tv.style.display!=='none';
-  tv.style.display = on?'none':'block';
-  e.target.textContent = on?'Show table':'Hide table';
+document.getElementById('m-abs').addEventListener('click',()=>setMode('abs'));
+document.getElementById('m-rel').addEventListener('click',()=>setMode('rel'));
+document.getElementById('tgl-table2').addEventListener('click',e=>{
+  const on=tv.style.display!=='none';
+  tv.style.display=on?'none':'block';
+  e.target.textContent=on?'Show table':'Hide table';
   e.target.setAttribute('aria-expanded',String(!on));
 });
-document.getElementById('tgl-theme').addEventListener('click',()=>{
+document.getElementById('tgl-theme2').addEventListener('click',()=>{
   const cur=document.documentElement.getAttribute('data-theme');
-  const dark = cur ? cur==='dark' : matchMedia('(prefers-color-scheme: dark)').matches;
-  document.documentElement.setAttribute('data-theme', dark?'light':'dark');
+  const dark=cur?cur==='dark':matchMedia('(prefers-color-scheme: dark)').matches;
+  document.documentElement.setAttribute('data-theme',dark?'light':'dark');
 });
-addEventListener('resize',()=>{});
-draw(); table();
+draw(); drawPanels(); drawIndexed(); table();
 </script>
 </body>
 </html>

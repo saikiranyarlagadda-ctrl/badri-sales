@@ -1,0 +1,16 @@
+# Raw exports contain customer names, emails and phone numbers.
+# This repository is PUBLIC — never commit them. Only aggregate counts
+# (the DATA array in index.html) belong in git.
+data/
+*.csv
+*.xlsx
+*.xls
+*.json
+!package.json
+
+# local scratch
+_run.js
+_stub.js
+_check.js
+.DS_Store
+Thumbs.db
